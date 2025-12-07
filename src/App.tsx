@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Upload from "./pages/Upload";
@@ -21,18 +22,20 @@ const App = () => (
       <Toaster />
       <Sonner position="top-right" />
       <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/upload" element={<Upload />} />
-            <Route path="/library" element={<Library />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
+        <AuthProvider>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/upload" element={<Upload />} />
+              <Route path="/library" element={<Library />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
