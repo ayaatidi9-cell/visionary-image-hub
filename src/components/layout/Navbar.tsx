@@ -1,7 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
-  Eye, 
   Upload, 
   Image, 
   User, 
@@ -14,6 +13,7 @@ import {
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import logo from "@/assets/logo.png";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -40,13 +40,11 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="relative">
-              <Eye className="w-8 h-8 text-primary transition-transform group-hover:scale-110" />
-              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-            <span className="text-xl font-bold text-foreground">
-              AsMe <span className="text-gradient">Vision</span>
-            </span>
+            <img 
+              src={logo} 
+              alt="AsMe Vision" 
+              className="h-10 w-auto transition-transform group-hover:scale-105"
+            />
           </Link>
 
           {/* Desktop Navigation */}
