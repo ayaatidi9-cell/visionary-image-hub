@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   Eye, 
@@ -8,10 +8,12 @@ import {
   LayoutDashboard, 
   LogOut,
   Menu,
-  X
+  X,
+  Shield
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -22,10 +24,15 @@ const navLinks = [
 
 export function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
 
-  // Mock auth state - will be replaced with real auth
-  const isAuthenticated = false;
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+    setMobileMenuOpen(false);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50">
@@ -62,15 +69,34 @@ export function Navbar() {
                 </Link>
               );
             })}
+            {isAuthenticated && user?.isAdmin && (
+              <Link to="/admin">
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "gap-2",
+                    location.pathname === "/admin" && "bg-secondary text-foreground"
+                  )}
+                >
+                  <Shield className="w-4 h-4" />
+                  Admin
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
-              <Button variant="ghost" className="gap-2">
-                <LogOut className="w-4 h-4" />
-                Déconnexion
-              </Button>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">
+                  {user?.name}
+                </span>
+                <Button variant="ghost" className="gap-2" onClick={handleLogout}>
+                  <LogOut className="w-4 h-4" />
+                  Déconnexion
+                </Button>
+              </div>
             ) : (
               <>
                 <Link to="/auth">
@@ -119,9 +145,23 @@ export function Navbar() {
                 </Link>
               );
             })}
+            {isAuthenticated && user?.isAdmin && (
+              <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start gap-2",
+                    location.pathname === "/admin" && "bg-secondary"
+                  )}
+                >
+                  <Shield className="w-4 h-4" />
+                  Admin
+                </Button>
+              </Link>
+            )}
             <div className="pt-2 border-t border-border/50 space-y-2">
               {isAuthenticated ? (
-                <Button variant="ghost" className="w-full justify-start gap-2">
+                <Button variant="ghost" className="w-full justify-start gap-2" onClick={handleLogout}>
                   <LogOut className="w-4 h-4" />
                   Déconnexion
                 </Button>

@@ -1,13 +1,17 @@
-import { useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { login, register, isAuthenticated } = useAuth();
+  
   const [isLogin, setIsLogin] = useState(searchParams.get("mode") !== "register");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -19,40 +23,69 @@ export default function Auth() {
     confirmPassword: ""
   });
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Validation
-    if (!formData.email || !formData.password) {
-      toast.error("Veuillez remplir tous les champs");
-      setLoading(false);
-      return;
-    }
+    try {
+      if (isLogin) {
+        // Login
+        if (!formData.email || !formData.password) {
+          toast.error("Veuillez remplir tous les champs");
+          setLoading(false);
+          return;
+        }
 
-    if (!isLogin) {
-      if (!formData.name) {
-        toast.error("Veuillez entrer votre nom");
-        setLoading(false);
-        return;
-      }
-      if (formData.password !== formData.confirmPassword) {
-        toast.error("Les mots de passe ne correspondent pas");
-        setLoading(false);
-        return;
-      }
-      if (formData.password.length < 6) {
-        toast.error("Le mot de passe doit contenir au moins 6 caractères");
-        setLoading(false);
-        return;
-      }
-    }
+        const result = await login(formData.email, formData.password);
+        if (result.success) {
+          toast.success("Connexion réussie !");
+          navigate("/dashboard");
+        } else {
+          toast.error(result.error || "Erreur de connexion");
+        }
+      } else {
+        // Register
+        if (!formData.name) {
+          toast.error("Veuillez entrer votre nom");
+          setLoading(false);
+          return;
+        }
+        if (!formData.email || !formData.password) {
+          toast.error("Veuillez remplir tous les champs");
+          setLoading(false);
+          return;
+        }
+        if (formData.password !== formData.confirmPassword) {
+          toast.error("Les mots de passe ne correspondent pas");
+          setLoading(false);
+          return;
+        }
+        if (formData.password.length < 6) {
+          toast.error("Le mot de passe doit contenir au moins 6 caractères");
+          setLoading(false);
+          return;
+        }
 
-    // Simulate auth - will be replaced with real Supabase auth
-    setTimeout(() => {
-      toast.success(isLogin ? "Connexion réussie !" : "Compte créé avec succès !");
+        const result = await register(formData.name, formData.email, formData.password);
+        if (result.success) {
+          toast.success("Compte créé avec succès !");
+          navigate("/dashboard");
+        } else {
+          toast.error(result.error || "Erreur lors de l'inscription");
+        }
+      }
+    } catch (error) {
+      toast.error("Une erreur est survenue");
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (
